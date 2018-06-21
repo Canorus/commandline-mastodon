@@ -1,6 +1,6 @@
 # commandline-mastodon
 
-Basic code to test sending toot from commandline.
+Basic code to test sending toot from commandline. Requires python3
 
 `quit` terminates code.
 
