@@ -20,7 +20,7 @@ def toot():
         website = input('input your mastodon instance address: ')
 
         data = {'client_name':client_name,'redirect_uris':'urn:ietf:wg:oauth:2.0:oob','scopes':'read write follow'}
-        r = requests.post('https://twingyeo.kr/api/v1/apps',data=data)
+        r = requests.post(website+'/api/v1/apps',data=data)
         print(r.status_code, r.reason)
         #print(r.text)
         print(r.text)
@@ -31,7 +31,7 @@ def toot():
         client_secret = rdata['client_secret']
 
         # open authentication page
-        webbrowser.open('https://twingyeo.kr/oauth/authorize?client_id='+client_id+'&redirect_uri=urn:ietf:wg:oauth:2.0:oob&response_type=code&scope=read%20write%20follow')
+        webbrowser.open(website+'/oauth/authorize?client_id='+client_id+'&redirect_uri=urn:ietf:wg:oauth:2.0:oob&response_type=code&scope=read%20write%20follow')
 
         # input code
         code = input('input your code: ')
@@ -39,7 +39,7 @@ def toot():
 
         # Retrieving access token
         auth_data = {'client_id':client_id,'client_secret':client_secret,'code':code,'grant_type':'authorization_code','redirect_uri':'urn:ietf:wg:oauth:2.0:oob'}
-        rauth = requests.post('https://twingyeo.kr/oauth/token',data = auth_data)
+        rauth = requests.post(website+'/oauth/token',data = auth_data)
 
         print(rauth.json())
         # retrieving access token

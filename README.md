@@ -9,7 +9,8 @@ caveat: login credentials(especially access token) are saved to local file as `c
 ## Todo
 
 - [ ] line break
-- [ ] Timeline streaming on commandline
+- [x] Timeline streaming on commandline
+- [ ] merge local and home timeline
 - [ ] strip off html tags
 - [ ] images, perhaps?
-- [ ] CW and all other sings
+- [ ] CW and all other things
