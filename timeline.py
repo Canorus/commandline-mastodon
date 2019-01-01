@@ -70,13 +70,13 @@ def dec(t):
         else:
             print('')
             print('-------------------------------')
-    print('@'+str(json.loads(t)['account']['display_name'])+' id: '+str(json.loads(t)['id']))
+    print(str(json.loads(t)['account']['display_name']+' (@'+str(json.loads(t)['account']['username'])+')'+' id: '+str(json.loads(t)['id'])))
     strip(json.loads(t)['content'])
 
 # print timeline
 
 for res in timeline:
-    print('@'+res['account']['display_name']+' id: '+res['id'])
+    print(res['account']['display_name']+' (@'+str(res['account']['username'])+')'+' id: '+res['id'])
     if res['spoiler_text']:
         print('!!변뚜주의!! '+res['spoiler_text'])
     if res['media_attachments']:
@@ -112,7 +112,7 @@ for l in r_user.iter_lines():
     if mode:
         try:
             newdec = json.loads(re.sub('data: ','',dec))
-            print('@'+str(newdec['account']['display_name'])+' id: '+str(newdec['id']))
+            print(str(newdec['account']['display_name'])+' (@'+str(newdec['account']['username'])+')'+' id: '+str(newdec['id']))
             try:
                 if newdec['spoiler_text']:
                     print('!!변뚜주의!! '+newdec['spoiler_text'])
@@ -158,14 +158,14 @@ for l in r_user.iter_lines():
                         except:
                             pass
                     # instance exists, username doesn't
-                    print('no username')
+                    #print('no username')
                     if username_count == len(position[i]):
                         position[i][k].append({"username":username, "position":str(newdec['id'])})
                     break
                 instance_count += 1
             # instance doesn't exists
             if instance_count == len(position):
-                print('no instance')
+                #print('no instance')
                 position.append([{"instance":instance},{"username":username,"position":str(newdec['id'])}])
             with open('position.json','w') as f:
                 json.dump(position,f)
@@ -181,6 +181,9 @@ for l in r_user.iter_lines():
                 action = 'favourited'
             elif newdec['type'] == 'mention':
                 action = 'mentioned to'
+            elif newdec['type'] == 'follow':
+                print('@'+str(newdec['account']['display_name'])+' followed you')
+                raise
             # check if newdec['account']['url'] is different from mine
             # then add instance address
             print('@'+str(newdec['account']['display_name'])+' '+action+' your status:')
