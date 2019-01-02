@@ -76,7 +76,19 @@ def dec(t):
 # print timeline
 
 for res in timeline:
-    print(res['account']['display_name']+' (@'+str(res['account']['username'])+')'+' id: '+res['id'])
+    rt = 0
+    if res['reblog']:
+        disp_name = res['reblog']['account']['display_name']
+        user_name = res['reblog']['account']['username']
+        rt = 1
+        rt_disp_name = res['account']['display_name']
+        rt_user_name = res['account']['username']
+    else:
+        disp_name = res['account']['display_name']
+        user_name = res['account']['username']
+    print(disp_name+'(@'+user_name+') id: '+str(res['id']))
+    if rt:
+        print('>>>> reblogged by'+rt_disp_name+'(@'+rt_user_name+')')
     if res['spoiler_text']:
         print('!!변뚜주의!! '+res['spoiler_text'])
     if res['media_attachments']:
@@ -102,6 +114,7 @@ mode = 1
 #    (dec(user),dec(local))
 
 for l in r_user.iter_lines():
+    rt = 0
     dec = l.decode('utf-8')
     if dec == 'event: notification':
         mode = 0
@@ -112,7 +125,18 @@ for l in r_user.iter_lines():
     if mode:
         try:
             newdec = json.loads(re.sub('data: ','',dec))
-            print(str(newdec['account']['display_name'])+' (@'+str(newdec['account']['username'])+')'+' id: '+str(newdec['id']))
+            if newdec['reblog']:
+                disp_name = newdec['reblog']['account']['display_name']
+                user_name = newdec['reblog']['account']['username']
+                rt = 1
+                rt_disp_name = newdec['account']['display_name']
+                rt_user_name = newdec['account']['username']
+            else:
+                disp_name = newdec['account']['display_name']
+                user_name = newdec['account']['username']
+            print(disp_name+'(@'+user_name+') id: '+newdec['id'])
+            if rt:
+                print('>>>> reblogged by '+rt_disp_name+'(@'+rt_user_name+')')
             try:
                 if newdec['spoiler_text']:
                     print('!!변뚜주의!! '+newdec['spoiler_text'])
