@@ -2,6 +2,9 @@ import requests
 import json
 import re
 import os
+import shutil # for terminal window width
+from datetime import datetime as dt
+import pytz
 
 from credential import retrieve
 
@@ -31,25 +34,23 @@ except:
 head = {'Authorization':'Bearer '+access_code}
 
 # get local timeline
-# param = {'local':'true'}
+# param['local'] = 'true'
 # response = requests.get('https://twingyeo.kr/api/v1/timelines/public',headers=head,params=param)
-#print('data successfully received...')
-
-timeline = 0
 
 # get home timeline
 response = requests.get(instance+'/api/v1/timelines/home',headers=head,params=param)
+
 print('data successfully received...')
 
 #make timeline in time order
 print('printing timeline...')
-print('-------------------------------')
+print('-'*shutil.get_terminal_size((80,20)).columns)
 timeline = []
 
 for res in response.json():
 	timeline.insert(0,res)
 
-def strip(t):
+def strip(t,w):
     t = re.sub('</p><p>','\n',t)
     t = re.sub('(<.?p>|<.?a.*?>|<.?span.*?>)','',t)
     t = re.sub('&lt;','<',t)
@@ -58,23 +59,23 @@ def strip(t):
     t = re.sub('&quot;','\'',t)
     t = re.sub('<br.*?\/?>','\n',t)
     print(t)
-    print('-------------------------------')
+    print('-'*w)
 
-def dec(t):
-    t = t.decode('utf-8')
-    try:
-        t = re.sub('data: ','',t)
-    except:
-        if t == ':thump':
-            pass
-        else:
-            print('')
-            print('-------------------------------')
-    print(str(json.loads(t)['account']['display_name']+' (@'+str(json.loads(t)['account']['username'])+')'+' id: '+str(json.loads(t)['id'])))
-    strip(json.loads(t)['content'])
+def utctokst(utc_time): # in isoformat
+    from datetime import datetime as dt
+    import pytz
+    now = str(utc_time)[:-5]
+    #count length
+    time_format = '%Y-%m-%dT%H:%M:%S'
+    kst_format = pytz.timezone('Asia/Seoul')
+    utc_format = pytz.timezone('UTC')
+    time_object = dt.strptime(now, time_format)
+    time_object = utc_format.localize(time_object)
+    time_local = kst_format.normalize(time_object.astimezone(kst_format))
+    return time_local
 
 # print timeline
-
+w = shutil.get_terminal_size().columns
 for res in timeline:
     rt = 0
     if res['reblog']:
@@ -86,19 +87,24 @@ for res in timeline:
     else:
         disp_name = res['account']['display_name']
         user_name = res['account']['username']
-    print(disp_name+'(@'+user_name+') id: '+str(res['id']))
+    #print(disp_name+'(@'+user_name+') id: '+str(res['id']))
+    #created time
+    now = utctokst(res['created_at']).strftime("%H:%M:%S")
+    spacer = w - len(disp_name+'(@'+user_name+')') - len(now)
+    print(disp_name+'(@'+user_name+')'+' '*spacer+now)
     if rt:
         print('>>>> reblogged by'+rt_disp_name+'(@'+rt_user_name+')')
     if res['spoiler_text']:
         print('!!변뚜주의!! '+res['spoiler_text'])
     if res['media_attachments']:
-        print('image link: '+res['media_attachments'][0]['url'])
-    strip(res['content'])
+        for i in range(len(res['media_attachments'])):
+            print('image link: '+res['media_attachments'][i]['url'])
+    strip(res['content'],w)
 
 print('timeline printed...')
 
 print('timeline streaming initiated...')
-print('-------------------------------')
+print('-'*w)
 # timeline streaming
 #uri_local = instance+'/api/v1/streaming/public/local'
 uri_user = instance+'/api/v1/streaming/user'
@@ -108,10 +114,6 @@ r_user = requests.get(uri_user,headers=head,stream=True)
 print('user home socket connected.')
 
 mode = 1
-
-#inte = zip(r_local.iter_lines(), r_user.iter_lines())
-#for user, local in inte:
-#    (dec(user),dec(local))
 
 for l in r_user.iter_lines():
     rt = 0
@@ -125,6 +127,7 @@ for l in r_user.iter_lines():
     if mode:
         try:
             newdec = json.loads(re.sub('data: ','',dec))
+            w = shutil.get_terminal_size().columns
             if newdec['reblog']:
                 disp_name = newdec['reblog']['account']['display_name']
                 user_name = newdec['reblog']['account']['username']
@@ -134,7 +137,10 @@ for l in r_user.iter_lines():
             else:
                 disp_name = newdec['account']['display_name']
                 user_name = newdec['account']['username']
-            print(disp_name+'(@'+user_name+') id: '+newdec['id'])
+            from_id = disp_name+'(@'+user_name+')'
+            now = dt.now().strftime("%H:%M:%S")
+            spacer = w - len(from_id) - len(now)
+            print(from_id + ' '*spacer + now)
             if rt:
                 print('>>>> reblogged by '+rt_disp_name+'(@'+rt_user_name+')')
             try:
@@ -144,11 +150,12 @@ for l in r_user.iter_lines():
                 pass
             try:
                 if newdec['media_attachments']:
-                    print('image link: '+newdec['media_attachments'][0]['url'])
+                    for i in range(len(newdec['media_attachments'])):
+                        print('image link: '+newdec['media_attachments'][i]['url'])
             except:
                 pass
             content = newdec['content']
-            strip(content)
+            strip(content,w)
             # save last status from timeline
             # maybe add user timeline / local timeline
             # [                                             # position:list
@@ -212,6 +219,6 @@ for l in r_user.iter_lines():
             # then add instance address
             print('@'+str(newdec['account']['display_name'])+' '+action+' your status:')
             print('>>> ')
-            strip(str(newdec['status']['content']))
+            strip(str(newdec['status']['content']),w)
         except:
             pass
