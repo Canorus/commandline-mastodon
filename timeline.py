@@ -74,23 +74,30 @@ def utctokst(utc_time): # in isoformat
     time_local = kst_format.normalize(time_object.astimezone(kst_format))
     return time_local
 
+def cal_spacer(w, text):
+    spacer1 = w - len(text) - 8
+    spacer2 = w - len(text.encode('utf-8')) - 8
+    spacer3 = int((spacer1 - spacer2)/2)
+    return spacer2 + spacer3
+    
 # print timeline
 w = shutil.get_terminal_size().columns
 for res in timeline:
     rt = 0
     if res['reblog']:
         disp_name = res['reblog']['account']['display_name']
-        user_name = res['reblog']['account']['username']
+        user_name = res['reblog']['account']['acct']
         rt = 1
         rt_disp_name = res['account']['display_name']
-        rt_user_name = res['account']['username']
+        rt_user_name = res['account']['acct']
     else:
         disp_name = res['account']['display_name']
-        user_name = res['account']['username']
+        user_name = res['account']['acct']
     #print(disp_name+'(@'+user_name+') id: '+str(res['id']))
     #created time
     now = utctokst(res['created_at']).strftime("%H:%M:%S")
-    spacer = w - len(disp_name+'(@'+user_name+')') - len(now)
+    name_holder = disp_name+'(@'+user_name+')'
+    spacer = cal_spacer(w, name_holder)
     print(disp_name+'(@'+user_name+')'+' '*spacer+now)
     if rt:
         print('>>>> reblogged by'+rt_disp_name+'(@'+rt_user_name+')')
@@ -130,16 +137,16 @@ for l in r_user.iter_lines():
             w = shutil.get_terminal_size().columns
             if newdec['reblog']:
                 disp_name = newdec['reblog']['account']['display_name']
-                user_name = newdec['reblog']['account']['username']
+                user_name = newdec['reblog']['account']['acct']
                 rt = 1
                 rt_disp_name = newdec['account']['display_name']
-                rt_user_name = newdec['account']['username']
+                rt_user_name = newdec['account']['acct']
             else:
                 disp_name = newdec['account']['display_name']
-                user_name = newdec['account']['username']
+                user_name = newdec['account']['acct']
             from_id = disp_name+'(@'+user_name+')'
             now = dt.now().strftime("%H:%M:%S")
-            spacer = w - len(from_id) - len(now)
+            spacer = cal_spacer(w, from_id)
             print(from_id + ' '*spacer + now)
             if rt:
                 print('>>>> reblogged by '+rt_disp_name+'(@'+rt_user_name+')')
