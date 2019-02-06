@@ -96,11 +96,17 @@ for res in timeline:
     #print(disp_name+'(@'+user_name+') id: '+str(res['id']))
     #created time
     now = utctokst(res['created_at']).strftime("%H:%M:%S")
-    name_holder = disp_name+'(@'+user_name+')'
+    id = str(res['id'])
+    name_holder = disp_name+'(@'+user_name+') '+id
     spacer = cal_spacer(w, name_holder)
-    print(disp_name+'(@'+user_name+')'+' '*spacer+now)
+    print(name_holder+' '*spacer+now)
     if rt:
-        print('>>>> reblogged by'+rt_disp_name+'(@'+rt_user_name+')')
+        print('>>>> reblogged by '+rt_disp_name+'(@'+rt_user_name+')')
+        if res['reblog']['spoiler_text']:
+            print('!!변뚜주의!! '+res['reblog']['spoiler_text'])
+        if res['reblog']['media_attachments']:
+            for i in range(len(res['reblog']['media_attachments'])):
+                print('image link: '+res['reblog']['media_attachments'][i]['url'])
     if res['spoiler_text']:
         print('!!변뚜주의!! '+res['spoiler_text'])
     if res['media_attachments']:
@@ -144,19 +150,25 @@ for l in r_user.iter_lines():
             else:
                 disp_name = newdec['account']['display_name']
                 user_name = newdec['account']['acct']
-            from_id = disp_name+'(@'+user_name+')'
+            id = str(newdec['id'])
+            from_id = disp_name+'(@'+user_name+') '+id
             now = dt.now().strftime("%H:%M:%S")
             spacer = cal_spacer(w, from_id)
             print(from_id + ' '*spacer + now)
             if rt:
                 print('>>>> reblogged by '+rt_disp_name+'(@'+rt_user_name+')')
             try:
-                if newdec['spoiler_text']:
+                if rt:
+                    print('!!변뚜주의!! '+newdec['reblog']['spoiler_text'])
+                elif newdec['spoiler_text']:
                     print('!!변뚜주의!! '+newdec['spoiler_text'])
             except:
                 pass
             try:
-                if newdec['media_attachments']:
+                if rt:
+                    for i in range(len(newdec['reblog']['media_attachments'])):
+                        print('image link: '+newdec['reblog']['media_attachments'][i]['url'])
+                elif newdec['media_attachments']:
                     for i in range(len(newdec['media_attachments'])):
                         print('image link: '+newdec['media_attachments'][i]['url'])
             except:
