@@ -7,12 +7,12 @@ from datetime import datetime as dt
 import pytz
 
 from credential import retrieve
+from credential import chk_
 
-instance = input('input your instance: ')
-if instance[:5] != 'https':
-    instance = 'https://'+instance
+instance = chk_(input('input your instance: '))
 username = input('input your username: ')
-access_code = retrieve(username, instance)
+acc = retrieve(username, instance)
+
 try:
     with open('position.json') as f:
         pos = json.load(f)
@@ -31,7 +31,7 @@ try:
     param = {'since_id':position}
 except:
     param = ""
-head = {'Authorization':'Bearer '+access_code}
+head = {'Authorization':'Bearer '+acc}
 
 # get local timeline
 # param['local'] = 'true'
@@ -159,9 +159,13 @@ for l in r_user.iter_lines():
                 print('>>>> reblogged by '+rt_disp_name+'(@'+rt_user_name+')')
             try:
                 if rt:
-                    print('!!변뚜주의!! '+newdec['reblog']['spoiler_text'])
-                elif newdec['spoiler_text']:
-                    print('!!변뚜주의!! '+newdec['spoiler_text'])
+                    cw = newdec['reblog']['spoiler_text']
+                else:
+                    cw = newdec['spoiler_text']
+                if cw == '':
+                    raise
+                else:
+                    print('!!변뚜주의!! '+cw)
             except:
                 pass
             try:
