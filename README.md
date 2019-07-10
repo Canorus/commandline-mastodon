@@ -1,5 +1,11 @@
 # commandline-mastodon
 
+==================================
+This project is no longer maintained
+==================================
+
+requires **python3**
+
 Print timeline on your command line.
 
 run `python register.py` to get login credential, `python timeline.py` to print timeline.
