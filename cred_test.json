@@ -1,1 +1,0 @@
-[{ "instance": "instance_here", "account": [{ "username": "username1", "access_token": "access_token here" }, { "username": "username2", "access_token": "access_token2 here" }] }, { "instance": "instance2 here", "account": [{ "username": "username1", "access_token": "access_token" }] }]
